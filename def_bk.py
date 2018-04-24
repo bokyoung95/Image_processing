@@ -86,5 +86,30 @@ def MedianF_bk(img,size):
             img_median[i][j] =value      
     return img_median
 
+def Laplacian_bk():
+    L4 = np.array([[0,1,0],[1,-4,1],[0,1,0]])
+    L8 = np.array([[1,1,1],[1,-8,1],[1,1,1]])
+    return L4, L8
 
-            
+def Unsharpening_bk(img,img_g):
+    Unsharp = np.zeros((img.shape[0], img.shape[1]))
+    Unsharp = img - img_g
+    Unsharpimg = img + Unsharp
+    return Unsharp,Unsharpimg
+
+def highboost(img,Unsharp,k):
+    high = np.zeros((img.shape[0], img.shape[1]))
+    high = img + k*Unsharp
+    return high
+    
+def sobel_bk():
+    sobel_x = np.array([[-1,0,1],[-2,0,2],[-1,0,1]])
+    sobel_y = np.array([[-1,-2,-1],[0,0,0],[1,2,1]])
+    return sobel_x, sobel_y
+
+def roberts_bk():
+    roberts_x = np.array([[0,0,-1],[0,1,0],[0,0,0]])
+    roberts_y = np.array([[-1,0,0],[0,1,0],[0,0,0]])
+    return roberts_x, roberts_y
+    
+    
