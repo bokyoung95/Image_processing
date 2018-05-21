@@ -112,4 +112,109 @@ def roberts_bk():
     roberts_y = np.array([[-1,0,0],[0,1,0],[0,0,0]])
     return roberts_x, roberts_y
     
+def binary_bk(img,thre):
+    binary_data = np.zeros_like(img)
+    height = img.shape[0]
+    width = img.shape[1]
+    for x in range(height):
+        for y in range(width):
+            value = img[x][y]
+            if value > thre:
+                binary_data[x][y]=1
+    return binary_data
+
+def BmorphD_bk(img,s):
+    p = int((s.shape[0] -1)/2)  #패딩 개수 계산
+    height =  img.shape[0]
+    width = img.shape[1]
     
+    img_p = np.zeros((height+p*2,width+p*2))
+    img_p[p:-p,p:-p] = img  #패딩이 적용된 이미지
+    img_dil = np.zeros_like(img)
+    
+    for i in range(img_p.shape[0]-(s.shape[0]-1)):
+        for j in range(img_p.shape[1] - (s.shape[0]-1)):
+            mul = img_p[i:i+s.shape[0],j:j+s.shape[0]] *s
+            sum_mul = sum(sum(mul))
+            if sum_mul >0:
+                img_dil[i][j] =1
+            else:
+                img_dil[i][j] =0
+    return img_dil
+
+def BmorphE_bk(img,s,count):
+    p = int((s.shape[0] -1)/2)  #패딩 개수 계산
+    height =  img.shape[0]
+    width = img.shape[1]
+    
+    img_p = np.zeros((height+p*2,width+p*2))
+    img_p[p:-p,p:-p] = img  #패딩이 적용된 이미지
+    img_er = np.zeros_like(img)
+    
+    for i in range(img_p.shape[0]-(s.shape[0]-1)):
+        for j in range(img_p.shape[1] - (s.shape[0]-1)):
+            mul = img_p[i:i+s.shape[0],j:j+s.shape[0]] *s
+            sum_mul = sum(sum(mul))
+            if sum_mul==count:
+                img_er[i][j] =1
+            else:
+                img_er[i][j] =0
+    return img_er
+
+def CmorphD_bk(img,s):
+    p = int((s.shape[0] -1)/2)  #패딩 개수 계산
+    height =  img.shape[0]
+    width = img.shape[1]
+    
+    img_p = np.zeros((height+p*2,width+p*2))
+    img_p[p:-p,p:-p] = img  #패딩이 적용된 이미지
+    img_dil = np.zeros_like(img)
+    
+    for i in range(img_p.shape[0]-(s.shape[0]-1)):
+        for j in range(img_p.shape[1] - (s.shape[0]-1)):
+            add = img_p[i:i+s.shape[0],j:j+s.shape[0]] + s
+            maxV = add.max()
+            img_dil[i][j] = maxV
+    return img_dil
+
+def CmorphE_bk(img,s):
+    p = int((s.shape[0] -1)/2)  #패딩 개수 계산
+    height =  img.shape[0]
+    width = img.shape[1]
+    
+    img_p = np.zeros((height+p*2,width+p*2))
+    img_p[p:-p,p:-p] = img  #패딩이 적용된 이미지
+    img_er = np.zeros_like(img)
+    
+    for i in range(img_p.shape[0]-(s.shape[0]-1)):
+        for j in range(img_p.shape[1] - (s.shape[0]-1)):
+            add = img_p[i:i+s.shape[0],j:j+s.shape[0]] - s
+            minV = add.min()
+            img_er[i][j] = minV
+    return img_er
+
+def otsu_bk(img,hist):
+    hist_n = hist/(img.shape[0]* img.shape[1])
+    w0 = np.zeros(256)
+    avg0 = np.zeros(256)
+    avg1 = np.zeros(256)
+    w0[0] = 0
+    avg0[0] = 0
+    avg = 0
+    vb = np.zeros(256)
+    for i in range(0,256):
+        avg = avg + i * hist_n[i]
+    
+    for t in range(1,256):
+        w0[t] = w0[t-1] + hist_n[t]
+        if w0[t] == 0:
+            avg0[t] =0
+        else:
+            avg0[t] = (w0[t-1]*avg0[t-1] + t*hist_n[t])/w0[t]
+        if w0[t] == 1:
+            avg1[t] = 0
+        else:
+            avg1[t] = (avg-w0[t]*avg0[t])/(1-w0[t])
+        vb[t] = w0[t]*(1-w0[t])*(avg0[t]-avg1[t])**2
+        ind = np.unravel_index(np.argmax(vb, axis=None), vb.shape)
+    return ind[0]
